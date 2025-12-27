@@ -151,7 +151,7 @@
         </header>
 
         <!-- MAIN CONTENT CONTAINER -->
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-32 relative">
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-40 relative">
             
             <!-- PAGE: HOME -->
             <div id="page-home" class="app-page px-6">
@@ -286,7 +286,7 @@
         </div>
 
         <!-- BOTTOM NAVIGATION -->
-        <nav class="absolute bottom-6 left-5 right-5 glass-nav z-30 px-6 py-2 flex justify-between items-center rounded-2xl h-[70px]">
+        <nav class="absolute bottom-12 left-5 right-5 glass-nav z-30 px-6 py-2 flex justify-between items-center rounded-2xl h-[70px]">
             <button class="nav-btn flex flex-col items-center gap-1 text-pink-400 w-16" onclick="navigateTo('page-home')">
                 <i class="ph-fill ph-house text-2xl"></i> <span class="text-[10px] font-medium">Home</span>
             </button>
@@ -492,7 +492,7 @@
                     <div id="adminMenuList" class="space-y-3"></div>
                 </div>
 
-                <!-- TAB: KELOLA ADMIN (UPDATED: REAL FUNCTIONALITY) -->
+                <!-- TAB: KELOLA ADMIN -->
                 <div id="content-tab-admin" class="tab-content hidden">
                     <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
                         <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2"><i class="ph-fill ph-user-gear"></i> Keamanan</h3>
@@ -783,15 +783,38 @@
                 let style = colorMap[menu.color] || colorMap['slate'];
                 let isEmpty = menu.isEmpty;
                 let clickAction = () => {
+                    // 1. Cek jika kosong
                     if(isEmpty) return showToast('Slot menu ini belum diaktifkan', 'info');
-                    if(menu.action === 'wa') return openWhatsApp();
-                    if(menu.action && menu.action.startsWith('page:')) return navigateTo(menu.action.split(':')[1]);
-                    if(menu.action && menu.action.startsWith('url:')) {
-                        const url = menu.action.split('url:')[1];
-                        if(url && url !== '#') window.open(url, '_blank');
-                        else showToast('Link belum diatur', 'warning');
-                        return;
+                    
+                    let action = menu.action;
+                    
+                    // 2. Cek validitas action awal
+                    if(!action || action === '#') return showToast('Link belum diatur', 'warning');
+
+                    // 3. Action WhatsApp
+                    if(action === 'wa') return openWhatsApp();
+                    
+                    // 4. Action Halaman Internal
+                    if(action.startsWith('page:')) return navigateTo(action.split(':')[1]);
+                    
+                    // 5. Bersihkan prefix 'url:' jika ada (legacy)
+                    if(action.startsWith('url:')) {
+                        action = action.split('url:')[1];
                     }
+
+                    // CHECKPOINT: Cek apakah action valid setelah dibersihkan
+                    if (!action || action === '#' || action.trim() === '') {
+                        return showToast('Fitur ini belum tersedia', 'info');
+                    }
+
+                    // 6. Validasi URL Web
+                    // Jika tidak dimulai dengan http/https, tambahkan https:// secara otomatis
+                    if (!action.startsWith('http://') && !action.startsWith('https://')) {
+                        action = 'https://' + action;
+                    }
+                    
+                    // 7. Buka Link
+                    window.open(action, '_blank');
                 };
                 let containerClass = "w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-105 transition-transform duration-300 glass";
                 if(isEmpty) { containerClass = "w-16 h-16 rounded-2xl flex items-center justify-center " + style; style = "text-slate-500"; } 
