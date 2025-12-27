@@ -151,7 +151,7 @@
         </header>
 
         <!-- MAIN CONTENT CONTAINER -->
-        <main class="flex-1 overflow-y-auto no-scrollbar pb-40 relative">
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-44 relative">
             
             <!-- PAGE: HOME -->
             <div id="page-home" class="app-page px-6">
@@ -209,7 +209,7 @@
                 </div>
             </div>
 
-            <!-- PAGE: ACARA KHUSUS (Slot 6) -->
+            <!-- PAGE: ACARA KHUSUS (Slot 6 - Backup if admin adds it back) -->
             <div id="page-events" class="app-page hidden px-6 min-h-full">
                 <div class="flex items-center gap-3 mb-6 mt-2">
                     <button onclick="navigateTo('page-home')" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition"><i class="ph ph-arrow-left"></i></button>
@@ -286,7 +286,8 @@
         </div>
 
         <!-- BOTTOM NAVIGATION -->
-        <nav class="absolute bottom-12 left-5 right-5 glass-nav z-30 px-6 py-2 flex justify-between items-center rounded-2xl h-[70px]">
+        <!-- UPDATED: bottom-16 to raise it higher -->
+        <nav class="absolute bottom-16 left-5 right-5 glass-nav z-30 px-6 py-2 flex justify-between items-center rounded-2xl h-[70px]">
             <button class="nav-btn flex flex-col items-center gap-1 text-pink-400 w-16" onclick="navigateTo('page-home')">
                 <i class="ph-fill ph-house text-2xl"></i> <span class="text-[10px] font-medium">Home</span>
             </button>
@@ -533,15 +534,15 @@
         let mainMenuData = []; 
         let userReminders = JSON.parse(localStorage.getItem('mf_user_reminders')) || {};
 
-        // UPDATED: Slot 6, 7, 8 now pre-defined with functionality
+        // UPDATED: Slot 6 "Website"
         const defaultMainMenu = [
             { id: 1, name: 'Cek Ongkir', icon: 'ph-truck', color: 'blue', action: "url:https://rajapindah.com" },
             { id: 2, name: 'Order', icon: 'ph-shopping-cart', color: 'green', action: "wa" },
             { id: 3, name: 'Galery', icon: 'ph-image', color: 'purple', action: "page:page-gallery" },
             { id: 4, name: 'Katalog', icon: 'ph-book-bookmark', color: 'pink', action: "page:page-catalog" },
             { id: 5, name: 'Portal Mitra', icon: 'ph-handshake', color: 'orange', action: "url:#" },
-            // NEW SLOTS
-            { id: 6, name: 'Acara Khusus', icon: 'ph-confetti', color: 'orange', action: "page:page-events" },
+            // UPDATED SLOT 6 to "Website"
+            { id: 6, name: 'Website', icon: 'ph-globe', color: 'orange', action: "url:https://malangfloristgroup.com" },
             { id: 7, name: 'Kalender', icon: 'ph-calendar', color: 'blue', action: "page:page-calendar" },
             { id: 8, name: 'Produk Lain', icon: 'ph-package', color: 'purple', action: "page:page-other-products" }
         ];
@@ -601,18 +602,19 @@
             await fetchCollection('app_config', (data) => { 
                 if(data) {
                     appConfig = { ...appConfig, ...data }; 
-                    // Set admin code from saved config
                     if(appConfig.adminPin) adminCode = appConfig.adminPin;
                 }
                 updateUIConfig(); 
             });
             
-            // PATCH: Check if we have old data with empty slots
+            // PATCH LOGIC: Update old "Acara Khusus" to "Website"
             await fetchCollection('app_main_menus', (data) => {
                 if(data && data.list && data.list.length > 0) {
                     mainMenuData = data.list;
-                    // FORCE UPDATE FOR NEW FEATURES (Fixing the issue)
-                    if(mainMenuData[5].name === 'Masih Kosong') mainMenuData[5] = defaultMainMenu[5];
+                    // AUTO-UPDATE old menus
+                    if(mainMenuData[5].name === 'Acara Khusus' || mainMenuData[5].name === 'Masih Kosong') {
+                        mainMenuData[5] = defaultMainMenu[5]; // Set to Website
+                    }
                     if(mainMenuData[6].name === 'Masih Kosong') mainMenuData[6] = defaultMainMenu[6];
                     if(mainMenuData[7].name === 'Masih Kosong') mainMenuData[7] = defaultMainMenu[7];
                 }
