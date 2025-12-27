@@ -62,9 +62,8 @@
         }
         .ripple { animation: ripple 2s infinite; }
 
-        /* Tab Active State */
         .tab-btn.active {
-            background-color: #db2777; /* Pink 600 */
+            background-color: #db2777; 
             color: white;
             font-weight: 600;
             border: 1px solid rgba(255,255,255,0.1);
@@ -75,15 +74,15 @@
             transition: all 0.3s;
         }
 
-        /* Gallery Grid Layout */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 Kolom */
-            gap: 16px; /* Jarak antar foto */
-            padding-bottom: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .gallery-item:nth-child(3n) {
+            grid-column: span 2;
         }
         
-        /* Custom File Input */
         input[type="file"]::file-selector-button {
             background-color: #334155;
             color: white;
@@ -93,6 +92,39 @@
             cursor: pointer;
             margin-right: 10px;
             font-size: 12px;
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .calendar-day {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.5);
+            font-size: 12px;
+            cursor: pointer;
+            position: relative;
+        }
+        .calendar-day.today {
+            background: rgba(236, 72, 153, 0.2);
+            border: 1px solid #ec4899;
+            color: #ec4899;
+            font-weight: bold;
+        }
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            background-color: #3b82f6;
+            border-radius: 50%;
         }
     </style>
 </head>
@@ -137,7 +169,7 @@
                     </div>
                 </div>
 
-                <!-- INFO TOKO (Running Text) -->
+                <!-- INFO TOKO -->
                 <div class="mt-4">
                     <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700/50 flex items-center gap-2 overflow-hidden">
                         <span class="bg-pink-500/20 text-pink-400 text-[10px] font-bold px-2 py-0.5 rounded">INFO</span>
@@ -149,7 +181,6 @@
                 <div class="mt-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-slate-300 text-sm font-semibold">Menu Utama</h3>
-                        <!-- LOADING INDICATOR -->
                         <div id="loadingIndicator" class="hidden"><div class="loader"></div></div>
                     </div>
                     <div id="staticGrid" class="grid grid-cols-4 gap-y-6 gap-x-2"></div>
@@ -162,41 +193,95 @@
                     <button onclick="navigateTo('page-home')" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition"><i class="ph ph-arrow-left"></i></button>
                     <h2 class="text-lg font-bold">Galery Kami</h2>
                 </div>
-                
                 <div id="galleryContainer" class="gallery-grid pb-24">
-                    <!-- Gallery Items Injected Here -->
                     <div class="col-span-2 text-center py-10 text-slate-500 text-xs">Memuat Foto...</div>
                 </div>
             </div>
 
-            <!-- PAGE: CATALOG -->
+            <!-- PAGE: CATALOG (Slot 4) -->
             <div id="page-catalog" class="app-page hidden px-6 min-h-full">
                 <div class="flex items-center gap-3 mb-6 mt-2">
                     <button onclick="navigateTo('page-home')" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition"><i class="ph ph-arrow-left"></i></button>
-                    <h2 class="text-lg font-bold">Katalog Produk</h2>
+                    <h2 class="text-lg font-bold">Katalog Bunga</h2>
                 </div>
-
                 <div id="catalogContainer" class="space-y-4 pb-20">
-                    <!-- Catalog Items Injected Here -->
+                    <div class="text-center py-10 text-slate-500 text-xs">Memuat Produk...</div>
+                </div>
+            </div>
+
+            <!-- PAGE: ACARA KHUSUS (Slot 6) -->
+            <div id="page-events" class="app-page hidden px-6 min-h-full">
+                <div class="flex items-center gap-3 mb-6 mt-2">
+                    <button onclick="navigateTo('page-home')" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition"><i class="ph ph-arrow-left"></i></button>
+                    <h2 class="text-lg font-bold">Acara Khusus</h2>
+                </div>
+                <div id="eventsContainer" class="space-y-4 pb-20">
+                    <div class="text-center py-10 text-slate-500 text-xs">Memuat Acara...</div>
+                </div>
+            </div>
+
+            <!-- PAGE: CALENDAR (Slot 7) -->
+            <div id="page-calendar" class="app-page hidden px-6 min-h-full">
+                <div class="flex items-center gap-3 mb-6 mt-2">
+                    <button onclick="navigateTo('page-home')" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition"><i class="ph ph-arrow-left"></i></button>
+                    <h2 class="text-lg font-bold">Kalender Pengingat</h2>
+                </div>
+                
+                <!-- Calendar UI -->
+                <div class="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="changeMonth(-1)" class="p-1 hover:bg-slate-700 rounded"><i class="ph ph-caret-left"></i></button>
+                        <h3 id="currentMonthYear" class="font-bold text-white"></h3>
+                        <button onclick="changeMonth(1)" class="p-1 hover:bg-slate-700 rounded"><i class="ph ph-caret-right"></i></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-slate-400 mb-2">
+                        <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid"></div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-sm font-bold text-slate-300 mb-3">Pengingat Anda</h4>
+                    <div id="reminderList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- PAGE: OTHER PRODUCTS (Slot 8) -->
+            <div id="page-other-products" class="app-page hidden px-6 min-h-full">
+                <div class="flex items-center gap-3 mb-6 mt-2">
+                    <button onclick="navigateTo('page-home')" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition"><i class="ph ph-arrow-left"></i></button>
+                    <h2 class="text-lg font-bold">Produk Lainnya</h2>
+                </div>
+                <div id="otherProductsContainer" class="space-y-4 pb-20">
                     <div class="text-center py-10 text-slate-500 text-xs">Memuat Produk...</div>
                 </div>
             </div>
 
         </main>
 
-        <!-- IMAGE POPUP MODAL (NEW) -->
+        <!-- IMAGE POPUP MODAL -->
         <div id="imagePopup" class="fixed inset-0 z-[100] bg-black/95 hidden flex flex-col items-center justify-center p-4 animate-fade-in transition-opacity duration-300" onclick="closeImagePopup()">
             <button class="absolute top-6 right-6 text-white/70 hover:text-white bg-slate-800/50 rounded-full p-2" onclick="closeImagePopup()">
                 <i class="ph ph-x text-2xl"></i>
             </button>
-            
             <div class="relative w-full max-w-sm" onclick="event.stopPropagation()">
-                <!-- Image Container with nice border in popup too -->
                 <div class="bg-white p-1.5 rounded-2xl shadow-2xl overflow-hidden">
                     <img id="popupImg" src="" class="w-full h-auto max-h-[70vh] object-contain rounded-xl" alt="Detail Foto">
                 </div>
-                <!-- Caption -->
                 <div id="popupCaption" class="text-center text-slate-300 mt-4 text-sm font-medium bg-slate-800/80 px-4 py-2 rounded-full inline-block mx-auto backdrop-blur-sm"></div>
+            </div>
+        </div>
+
+        <!-- REMINDER MODAL (CALENDAR) -->
+        <div id="reminderModal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex-col items-center justify-center p-6" onclick="closeReminderModal()">
+            <div class="w-full max-w-[280px] bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-700" onclick="event.stopPropagation()">
+                <h3 class="text-lg font-bold text-white mb-1" id="modalDateTitle">Tanggal</h3>
+                <p class="text-xs text-slate-400 mb-4">Tambah pengingat untuk tanggal ini.</p>
+                <input type="text" id="reminderInput" placeholder="Contoh: Ulang Tahun Ibu" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white mb-4">
+                <div class="flex gap-2">
+                    <button onclick="closeReminderModal()" class="flex-1 bg-slate-700 py-2 rounded-lg text-xs font-bold">Batal</button>
+                    <button onclick="saveReminder()" class="flex-1 bg-pink-600 py-2 rounded-lg text-xs font-bold">Simpan</button>
+                </div>
             </div>
         </div>
 
@@ -205,13 +290,11 @@
             <button class="nav-btn flex flex-col items-center gap-1 text-pink-400 w-16" onclick="navigateTo('page-home')">
                 <i class="ph-fill ph-house text-2xl"></i> <span class="text-[10px] font-medium">Home</span>
             </button>
-            
             <div class="absolute left-1/2 transform -translate-x-1/2 -top-6">
                 <button onclick="toggleQuickMenu()" class="w-28 h-14 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 shadow-xl shadow-pink-500/40 flex items-center justify-center border-4 border-slate-900 hover:scale-105 transition-transform duration-300 ripple z-40 group">
                     <i class="ph-fill ph-squares-four text-white text-3xl group-hover:rotate-90 transition-transform duration-300"></i>
                 </button>
             </div>
-
             <button class="nav-btn flex flex-col items-center gap-1 text-slate-500 hover:text-pink-300 transition-colors w-16 group" onclick="openAdminLogin()">
                 <i class="ph ph-shield-check text-2xl group-hover:text-pink-400 transition-colors"></i> <span class="text-[10px] font-medium">Admin</span>
             </button>
@@ -221,7 +304,6 @@
         <div id="quickMenu" class="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm hidden flex-col justify-end" onclick="toggleQuickMenu()">
              <div class="bg-slate-800 rounded-t-3xl p-6 transform transition-transform duration-300 translate-y-full mb-4 mx-2 rounded-b-3xl max-h-[80vh] overflow-y-auto" id="quickMenuContent" onclick="event.stopPropagation()">
                 <div class="w-12 h-1 bg-slate-600 rounded-full mx-auto mb-6"></div>
-                
                 <h3 class="text-sm font-bold mb-3 text-slate-400 uppercase tracking-wider">Hubungi Kami</h3>
                 <div class="grid grid-cols-3 gap-3 mb-6">
                     <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 cursor-pointer border border-slate-600/50" onclick="openWhatsApp()"> 
@@ -234,16 +316,12 @@
                         <i class="ph ph-map-pin text-red-400 text-2xl"></i> <span class="text-[10px]">Lokasi</span> 
                     </div>
                 </div>
-
                 <div class="h-px w-full bg-slate-700 mb-6"></div>
-
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Menu Lainnya</h3>
                 </div>
-                
                 <div id="dynamicMenuGrid" class="grid grid-cols-4 gap-y-6 gap-x-2"></div>
                 <div id="emptyMenuMsg" class="text-center text-slate-500 text-xs py-4 hidden">Belum ada menu tambahan.</div>
-
                 <button onclick="toggleQuickMenu()" class="w-full mt-6 py-3 rounded-xl bg-slate-700 text-sm font-medium hover:bg-slate-600 transition">Tutup Menu</button>
             </div>
         </div>
@@ -278,9 +356,13 @@
             <div class="px-4 pt-4 pb-2">
                 <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
                     <button onclick="switchTab('tab-toko')" id="btn-tab-toko" class="tab-btn active px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Kontak & Toko</button>
-                    <button onclick="switchTab('tab-gallery')" id="btn-tab-gallery" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Galery Foto</button>
+                    <button onclick="switchTab('tab-main-menu')" id="btn-tab-main-menu" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">8 Menu Depan</button>
+                    <button onclick="switchTab('tab-events')" id="btn-tab-events" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Acara Khusus</button>
+                    <button onclick="switchTab('tab-other-products')" id="btn-tab-other-products" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Produk Lain</button>
+                    <button onclick="switchTab('tab-gallery')" id="btn-tab-gallery" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Galery</button>
                     <button onclick="switchTab('tab-catalog')" id="btn-tab-catalog" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Katalog</button>
-                    <button onclick="switchTab('tab-menu')" id="btn-tab-menu" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Menu Quick</button>
+                    <button onclick="switchTab('tab-menu')" id="btn-tab-menu" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Menu Extra</button>
+                    <button onclick="switchTab('tab-admin')" id="btn-tab-admin" class="tab-btn px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap bg-slate-800">Kelola Admin</button>
                 </div>
             </div>
             
@@ -307,62 +389,119 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: GALERY FOTO -->
+                <!-- TAB: 8 MENU UTAMA -->
+                <div id="content-tab-main-menu" class="tab-content hidden">
+                    <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
+                        <h3 class="text-sm font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-squares-four"></i> Edit 8 Menu Depan</h3>
+                        <div id="adminMainMenuEditor" class="space-y-4"></div>
+                        <button onclick="saveMainMenuConfig()" class="w-full mt-6 bg-yellow-600 py-3 rounded-lg text-sm font-bold hover:bg-yellow-500 transition">Simpan Perubahan</button>
+                    </div>
+                </div>
+
+                <!-- TAB: ACARA KHUSUS -->
+                <div id="content-tab-events" class="tab-content hidden">
+                    <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
+                        <h3 class="text-sm font-bold text-orange-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-confetti"></i> Tambah Acara</h3>
+                        <div class="space-y-3">
+                            <input type="text" id="eventName" placeholder="Nama Acara" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <input type="text" id="eventDate" placeholder="Tanggal (contoh: 25 Des 2025)" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <textarea id="eventDesc" placeholder="Deskripsi Singkat" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white h-20"></textarea>
+                            <button onclick="addEventItem()" class="w-full bg-orange-600 py-2.5 rounded-lg text-sm font-bold hover:bg-orange-500">Simpan Acara</button>
+                        </div>
+                    </div>
+                    <div id="adminEventsList" class="space-y-2"></div>
+                </div>
+
+                <!-- TAB: PRODUK LAIN -->
+                <div id="content-tab-other-products" class="tab-content hidden">
+                    <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
+                        <h3 class="text-sm font-bold text-indigo-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-package"></i> Tambah Produk Lain</h3>
+                        <div class="space-y-3">
+                            <div class="border border-dashed border-slate-600 rounded-lg p-4 text-center hover:bg-slate-800/50 transition">
+                                <label for="otherProdImgInput" class="cursor-pointer block">
+                                    <i class="ph-duotone ph-upload-simple text-3xl text-indigo-400 mb-2"></i>
+                                    <div class="text-xs text-slate-300">Pilih Foto</div>
+                                </label>
+                                <input type="file" id="otherProdImgInput" accept="image/*" class="hidden">
+                                <div id="otherProdPreviewName" class="text-xs text-green-400 mt-2 truncate hidden"></div>
+                            </div>
+                            <input type="text" id="otherProdName" placeholder="Nama Produk" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <input type="text" id="otherProdPrice" placeholder="Harga (Rp)" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <div id="otherProdUploadStatus" class="hidden text-center text-[10px] text-blue-400 animate-pulse">Memproses...</div>
+                            <button onclick="processAndAddOtherProductItem()" class="w-full bg-indigo-600 py-2.5 rounded-lg text-sm font-bold hover:bg-indigo-500">Simpan Produk</button>
+                        </div>
+                    </div>
+                    <div id="adminOtherProductsList" class="space-y-2"></div>
+                </div>
+
+                <!-- TAB: GALERY -->
                 <div id="content-tab-gallery" class="tab-content hidden">
                     <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
-                        <h3 class="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-image"></i> Upload Foto Galery</h3>
+                        <h3 class="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-image"></i> Upload Foto</h3>
                         <div class="space-y-3">
-                            <!-- Input File for Gallery -->
                             <div class="border border-dashed border-slate-600 rounded-lg p-4 text-center hover:bg-slate-800/50 transition">
                                 <label for="imgGalleryInput" class="cursor-pointer block">
                                     <i class="ph-duotone ph-upload-simple text-3xl text-purple-400 mb-2"></i>
-                                    <div class="text-xs text-slate-300">Pilih Foto dari Galery</div>
-                                    <div class="text-[10px] text-slate-500 mt-1">Otomatis dikompres &lt; 500KB</div>
+                                    <div class="text-xs text-slate-300">Pilih Foto</div>
                                 </label>
                                 <input type="file" id="imgGalleryInput" accept="image/*" class="hidden">
                                 <div id="galleryPreviewName" class="text-xs text-green-400 mt-2 truncate hidden"></div>
                             </div>
-
-                            <input type="text" id="imgGalleryCaption" placeholder="Caption Singkat" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
-                            
-                            <!-- Loading Text for Upload -->
-                            <div id="uploadStatus" class="hidden text-center text-[10px] text-blue-400 animate-pulse">Sedang mengompres & mengupload...</div>
-
-                            <button onclick="processAndUploadGallery()" class="w-full bg-purple-600 py-2.5 rounded-lg text-sm font-bold hover:bg-purple-500">Upload Sekarang</button>
+                            <input type="text" id="imgGalleryCaption" placeholder="Caption" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <div id="uploadStatus" class="hidden text-center text-[10px] text-blue-400 animate-pulse">Memproses...</div>
+                            <button onclick="processAndUploadGallery()" class="w-full bg-purple-600 py-2.5 rounded-lg text-sm font-bold hover:bg-purple-500">Upload</button>
                         </div>
                     </div>
-                    <!-- List Preview Delete -->
                     <div id="adminGalleryList" class="grid grid-cols-3 gap-2"></div>
                 </div>
 
-                <!-- TAB 3: KATALOG PRODUK -->
+                <!-- TAB: KATALOG -->
                 <div id="content-tab-catalog" class="tab-content hidden">
                     <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
-                        <h3 class="text-sm font-bold text-pink-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-tag"></i> Tambah Produk</h3>
+                        <h3 class="text-sm font-bold text-pink-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-tag"></i> Tambah Bunga</h3>
                         <div class="space-y-3">
-                            <input type="text" id="prodName" placeholder="Nama Produk" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
-                            <input type="text" id="prodPrice" placeholder="Harga (Rp)" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
-                            <input type="text" id="prodImg" placeholder="URL Foto Produk" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
-                            <button onclick="addCatalogItem()" class="w-full bg-pink-600 py-2.5 rounded-lg text-sm font-bold hover:bg-pink-500">Simpan Produk</button>
+                            <div class="border border-dashed border-slate-600 rounded-lg p-4 text-center hover:bg-slate-800/50 transition">
+                                <label for="prodImgInput" class="cursor-pointer block">
+                                    <i class="ph-duotone ph-upload-simple text-3xl text-pink-400 mb-2"></i>
+                                    <div class="text-xs text-slate-300">Pilih Foto</div>
+                                </label>
+                                <input type="file" id="prodImgInput" accept="image/*" class="hidden">
+                                <div id="prodPreviewName" class="text-xs text-green-400 mt-2 truncate hidden"></div>
+                            </div>
+                            <input type="text" id="prodName" placeholder="Nama Bunga" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <input type="text" id="prodPrice" placeholder="Harga" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <div id="prodUploadStatus" class="hidden text-center text-[10px] text-blue-400 animate-pulse">Memproses...</div>
+                            <button onclick="processAndAddCatalogItem()" class="w-full bg-pink-600 py-2.5 rounded-lg text-sm font-bold hover:bg-pink-500">Simpan</button>
                         </div>
                     </div>
                     <div id="adminCatalogList" class="space-y-2"></div>
                 </div>
 
-                <!-- TAB 4: KELOLA MENU (QUICK MENU) -->
+                <!-- TAB: MENU EXTRA -->
                 <div id="content-tab-menu" class="tab-content hidden">
                     <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
-                        <h3 class="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-plus-circle"></i> Tambah Menu Cepat</h3>
-                        <p class="text-[10px] text-slate-400 mb-4">Muncul di tombol tengah (Quick Menu).</p>
+                        <h3 class="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2"><i class="ph-fill ph-plus-circle"></i> Menu Tambahan (>8)</h3>
                         <div class="space-y-4">
                             <input type="text" id="newMenuName" placeholder="Nama Menu" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
                             <input type="text" id="newMenuUrl" placeholder="URL" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
                             <div class="grid grid-cols-5 gap-2" id="iconSelector"></div>
                             <input type="hidden" id="selectedIcon" value="ph-star">
-                            <button onclick="addMenu()" class="w-full bg-blue-600 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-500">Simpan Menu</button>
+                            <button onclick="addMenu()" class="w-full bg-blue-600 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-500">Simpan</button>
                         </div>
                     </div>
                     <div id="adminMenuList" class="space-y-3"></div>
+                </div>
+
+                <!-- TAB: KELOLA ADMIN (UPDATED: REAL FUNCTIONALITY) -->
+                <div id="content-tab-admin" class="tab-content hidden">
+                    <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
+                        <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2"><i class="ph-fill ph-user-gear"></i> Keamanan</h3>
+                        <div class="space-y-4">
+                            <p class="text-[10px] text-slate-400">Ganti PIN untuk mengamankan halaman Admin.</p>
+                            <input type="number" id="newAdminPin" placeholder="PIN Baru (min 4 digit)" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                            <button onclick="updateAdminPin()" class="w-full bg-slate-700 py-2.5 rounded-lg text-sm font-bold hover:bg-slate-600 transition">Update PIN</button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -371,7 +510,6 @@
 
     <!-- LOGIC SYSTEM -->
     <script>
-        // --- CONFIG FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyA2WyjqAY-2EpygqC0izptGwaVwskkKGEA",
             authDomain: "home-app-dae08.firebaseapp.com",
@@ -385,36 +523,40 @@
         let useLocalStorage = false;
         const isConfigured = firebaseConfig.projectId !== "ISI_PROJECT_ID_DISINI";
         
-        // --- GLOBAL DATA ---
-        let appConfig = {
-            waNumber: "6281234567890", // Default
-            runningText: "Selamat datang di Malang Florist. Hubungi kami untuk pemesanan!"
-        };
+        let appConfig = { waNumber: "6281234567890", runningText: "Selamat datang di Malang Florist.", adminPin: "1234" };
+        let adminCode = "1234"; // Default
         let galleryData = [];
         let catalogData = [];
+        let eventsData = [];
+        let otherProductsData = [];
         let extraMenus = [];
-        const adminCode = "1234";
+        let mainMenuData = []; 
+        let userReminders = JSON.parse(localStorage.getItem('mf_user_reminders')) || {};
 
-        // --- STATIC MAIN MENUS (8 ITEMS) ---
-        const fixedMainMenu = [
-            { name: 'Cek Ongkir', icon: 'ph-truck', color: 'blue', action: "url:https://rajapindah.com" },
-            { name: 'Order', icon: 'ph-shopping-cart', color: 'green', action: "wa" },
-            { name: 'Galery', icon: 'ph-image', color: 'purple', action: "page:page-gallery" },
-            { name: 'Katalog', icon: 'ph-book-bookmark', color: 'pink', action: "page:page-catalog" },
-            { name: 'Portal Mitra', icon: 'ph-handshake', color: 'orange', action: "url:#" },
-            { name: 'Masih Kosong', icon: 'ph-dots-three', color: 'slate', isEmpty: true },
-            { name: 'Masih Kosong', icon: 'ph-dots-three', color: 'slate', isEmpty: true },
-            { name: 'Masih Kosong', icon: 'ph-dots-three', color: 'slate', isEmpty: true }
+        // UPDATED: Slot 6, 7, 8 now pre-defined with functionality
+        const defaultMainMenu = [
+            { id: 1, name: 'Cek Ongkir', icon: 'ph-truck', color: 'blue', action: "url:https://rajapindah.com" },
+            { id: 2, name: 'Order', icon: 'ph-shopping-cart', color: 'green', action: "wa" },
+            { id: 3, name: 'Galery', icon: 'ph-image', color: 'purple', action: "page:page-gallery" },
+            { id: 4, name: 'Katalog', icon: 'ph-book-bookmark', color: 'pink', action: "page:page-catalog" },
+            { id: 5, name: 'Portal Mitra', icon: 'ph-handshake', color: 'orange', action: "url:#" },
+            // NEW SLOTS
+            { id: 6, name: 'Acara Khusus', icon: 'ph-confetti', color: 'orange', action: "page:page-events" },
+            { id: 7, name: 'Kalender', icon: 'ph-calendar', color: 'blue', action: "page:page-calendar" },
+            { id: 8, name: 'Produk Lain', icon: 'ph-package', color: 'purple', action: "page:page-other-products" }
         ];
 
-        // --- INIT ---
+        let currentDate = new Date();
+
         function initApp() {
             const dot = document.getElementById('statusDot');
             const devStatus = document.getElementById('devStatusText');
             const offlineAlert = document.getElementById('offlineAlert');
 
+            mainMenuData = [...defaultMainMenu];
             renderStaticGrid();
-            navigateTo('page-home'); // Default page
+            navigateTo('page-home');
+            renderCalendarUser();
 
             if (isConfigured) {
                 try {
@@ -436,47 +578,55 @@
                 loadAllData();
             }
 
-            // File Input Listener for Preview Name
-            const fileInput = document.getElementById('imgGalleryInput');
-            if(fileInput) {
-                fileInput.addEventListener('change', function() {
-                    const fileName = this.files[0]?.name;
-                    const preview = document.getElementById('galleryPreviewName');
-                    if(fileName) {
-                        preview.textContent = "File: " + fileName;
-                        preview.classList.remove('hidden');
-                    } else {
-                        preview.classList.add('hidden');
-                    }
-                });
-            }
+            // LISTENERS FOR FILE INPUTS
+            const inputs = ['imgGalleryInput', 'prodImgInput', 'otherProdImgInput'];
+            const previews = ['galleryPreviewName', 'prodPreviewName', 'otherProdPreviewName'];
+            inputs.forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.addEventListener('change', function() {
+                        const fileName = this.files[0]?.name;
+                        const prev = document.getElementById(previews[idx]);
+                        if(fileName) { prev.textContent = "File: " + fileName; prev.classList.remove('hidden'); }
+                        else { prev.classList.add('hidden'); }
+                    });
+                }
+            });
         }
 
-        // --- DATA HANDLER (LOAD & SAVE) ---
         async function loadAllData() {
             const loader = document.getElementById('loadingIndicator');
             if(loader) loader.classList.remove('hidden');
             
-            // 1. Config
-            await fetchCollection('app_config', (data) => {
-                if(data.waNumber) appConfig = data;
-                updateUIConfig();
+            await fetchCollection('app_config', (data) => { 
+                if(data) {
+                    appConfig = { ...appConfig, ...data }; 
+                    // Set admin code from saved config
+                    if(appConfig.adminPin) adminCode = appConfig.adminPin;
+                }
+                updateUIConfig(); 
             });
-            // 2. Gallery
-            await fetchCollection('app_gallery', (data) => {
-                galleryData = data.list || [];
-                renderGalleryUser(); renderGalleryAdmin();
+            
+            // PATCH: Check if we have old data with empty slots
+            await fetchCollection('app_main_menus', (data) => {
+                if(data && data.list && data.list.length > 0) {
+                    mainMenuData = data.list;
+                    // FORCE UPDATE FOR NEW FEATURES (Fixing the issue)
+                    if(mainMenuData[5].name === 'Masih Kosong') mainMenuData[5] = defaultMainMenu[5];
+                    if(mainMenuData[6].name === 'Masih Kosong') mainMenuData[6] = defaultMainMenu[6];
+                    if(mainMenuData[7].name === 'Masih Kosong') mainMenuData[7] = defaultMainMenu[7];
+                }
+                else {
+                    mainMenuData = [...defaultMainMenu];
+                }
             });
-            // 3. Catalog
-            await fetchCollection('app_catalog', (data) => {
-                catalogData = data.list || [];
-                renderCatalogUser(); renderCatalogAdmin();
-            });
-            // 4. Extra Menus
-            await fetchCollection('app_menus_v4', (data) => {
-                extraMenus = data.list || [];
-                renderDynamicMenu(); renderAdminMenuList();
-            });
+            renderStaticGrid(); renderAdminMainMenuInputs(); 
+
+            await fetchCollection('app_gallery', (data) => { galleryData = data.list || []; renderGalleryUser(); renderGalleryAdmin(); });
+            await fetchCollection('app_catalog', (data) => { catalogData = data.list || []; renderCatalogUser(); renderCatalogAdmin(); });
+            await fetchCollection('app_events', (data) => { eventsData = data.list || []; renderEventsUser(); renderEventsAdmin(); });
+            await fetchCollection('app_other_products', (data) => { otherProductsData = data.list || []; renderOtherProductsUser(); renderOtherProductsAdmin(); });
+            await fetchCollection('app_menus_v4', (data) => { extraMenus = data.list || []; renderDynamicMenu(); renderAdminMenuList(); });
 
             if(loader) loader.classList.add('hidden');
         }
@@ -501,322 +651,13 @@
             await db.collection("settings").doc(colName).set(data);
         }
 
-        // --- UI UPDATERS ---
         function updateUIConfig() {
             document.getElementById('inputWaAdmin').value = appConfig.waNumber;
             document.getElementById('inputRunningText').value = appConfig.runningText;
             document.getElementById('runningTextDisplay').innerText = appConfig.runningText;
         }
 
-        // --- VIEW NAVIGATION ---
-        function navigateTo(pageId) {
-            document.querySelectorAll('.app-page').forEach(el => el.classList.add('hidden'));
-            document.getElementById(pageId).classList.remove('hidden');
-            window.scrollTo(0,0);
-        }
-
-        // --- RENDER MAIN GRID ---
-        function renderStaticGrid() {
-            const grid = document.getElementById('staticGrid');
-            grid.innerHTML = '';
-            
-            const colorMap = {
-                'blue': 'text-blue-400 bg-blue-500/10',
-                'green': 'text-green-400 bg-green-500/10',
-                'pink': 'text-pink-400 bg-pink-500/10',
-                'purple': 'text-purple-400 bg-purple-500/10',
-                'orange': 'text-orange-400 bg-orange-500/10',
-                'slate': 'text-slate-500 bg-slate-800/50 border border-slate-700 border-dashed'
-            };
-
-            fixedMainMenu.forEach(menu => {
-                let style = colorMap[menu.color];
-                let clickAction = () => {
-                    if(menu.isEmpty) return showToast('Slot menu ini masih kosong', 'info');
-                    if(menu.action === 'wa') return openWhatsApp();
-                    if(menu.action.startsWith('page:')) return navigateTo(menu.action.split(':')[1]);
-                    if(menu.action.startsWith('url:')) return window.open(menu.action.split(':')[1], '_blank');
-                };
-
-                let containerClass = "w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-105 transition-transform duration-300 glass";
-                if(menu.isEmpty) {
-                    containerClass = "w-16 h-16 rounded-2xl flex items-center justify-center " + style;
-                    style = "text-slate-500"; 
-                } else {
-                    containerClass += " " + style.split(' ')[1];
-                }
-
-                const div = document.createElement('div');
-                div.className = 'flex flex-col items-center gap-2 cursor-pointer group';
-                div.onclick = clickAction;
-                div.innerHTML = `
-                    <div class="${containerClass}"> 
-                        <i class="ph ${menu.icon} text-3xl ${style.split(' ')[0]}"></i> 
-                    </div>
-                    <span class="text-xs text-slate-400 font-medium text-center truncate w-full group-hover:text-white transition-colors">${menu.name}</span>
-                `;
-                grid.appendChild(div);
-            });
-        }
-
-        // --- IMAGE COMPRESSION & GALLERY ---
-        function compressImage(file, maxWidth, quality, callback) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = event => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > maxWidth) {
-                        height = Math.round(height * (maxWidth / width));
-                        width = maxWidth;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    // Output as Base64
-                    callback(canvas.toDataURL('image/jpeg', quality));
-                }
-            }
-        }
-
-        function processAndUploadGallery() {
-            const fileInput = document.getElementById('imgGalleryInput');
-            const caption = document.getElementById('imgGalleryCaption').value;
-            
-            if (fileInput.files.length === 0) {
-                return showToast('Pilih foto dari galeri dulu!', 'warning');
-            }
-
-            const file = fileInput.files[0];
-            const statusText = document.getElementById('uploadStatus');
-            statusText.classList.remove('hidden');
-
-            // Compress to max 600px width, 0.6 quality (agresif untuk Firestore)
-            compressImage(file, 600, 0.6, (base64String) => {
-                galleryData.push({ id: Date.now(), url: base64String, caption });
-                saveCollection('app_gallery', { list: galleryData });
-                renderGalleryAdmin(); 
-                renderGalleryUser();
-                
-                // Reset Form
-                fileInput.value = '';
-                document.getElementById('imgGalleryCaption').value = '';
-                document.getElementById('galleryPreviewName').classList.add('hidden');
-                statusText.classList.add('hidden');
-                showToast('Foto berhasil diupload!', 'success');
-            });
-        }
-
-        function deleteGalleryItem(id) {
-            if(!confirm('Hapus foto ini?')) return;
-            galleryData = galleryData.filter(i => i.id !== id);
-            saveCollection('app_gallery', { list: galleryData });
-            renderGalleryAdmin(); renderGalleryUser();
-        }
-
-        // --- GALERY RENDER (UPDATED: FRAME + POPUP) ---
-        function renderGalleryUser() {
-            const c = document.getElementById('galleryContainer');
-            c.innerHTML = '';
-            if(galleryData.length === 0) return c.innerHTML = '<div class="col-span-2 text-center text-slate-500 text-xs py-10">Belum ada foto.</div>';
-            
-            galleryData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'gallery-item aspect-square group';
-                // Tampilan Foto: Bingkai Putih, Shadow, Aspect Ratio 1:1, Object Cover (Anti Gepeng)
-                div.innerHTML = `
-                    <div class="w-full h-full bg-white p-1.5 rounded-xl shadow-lg relative cursor-pointer transform transition-transform duration-300 hover:scale-[1.02]" onclick="openImagePopup('${item.url}', '${item.caption || ''}')">
-                        <div class="w-full h-full overflow-hidden rounded-lg bg-slate-200 relative">
-                            <img src="${item.url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/150?text=Error'">
-                            <!-- Gradient Overlay for Caption visibility if needed, currently clean -->
-                        </div>
-                    </div>
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        // --- IMAGE POPUP LOGIC ---
-        function openImagePopup(url, caption) {
-            const popup = document.getElementById('imagePopup');
-            const img = document.getElementById('popupImg');
-            const cap = document.getElementById('popupCaption');
-            
-            img.src = url;
-            cap.innerText = caption || '';
-            
-            // Hide caption if empty
-            if(!caption) cap.classList.add('hidden');
-            else cap.classList.remove('hidden');
-
-            popup.classList.remove('hidden');
-        }
-
-        function closeImagePopup() {
-            document.getElementById('imagePopup').classList.add('hidden');
-        }
-
-        function renderGalleryAdmin() {
-            const c = document.getElementById('adminGalleryList');
-            c.innerHTML = '';
-            galleryData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'relative aspect-square rounded-lg overflow-hidden border border-slate-700 group';
-                div.innerHTML = `
-                    <img src="${item.url}" class="w-full h-full object-cover">
-                    <button onclick="deleteGalleryItem(${item.id})" class="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-md opacity-80 hover:opacity-100"><i class="ph-bold ph-trash"></i></button>
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        // --- CATALOG LOGIC ---
-        function addCatalogItem() {
-            const name = document.getElementById('prodName').value;
-            const price = document.getElementById('prodPrice').value;
-            const img = document.getElementById('prodImg').value;
-            if(!name) return showToast('Nama wajib diisi', 'warning');
-
-            catalogData.push({ id: Date.now(), name, price, img });
-            saveCollection('app_catalog', { list: catalogData });
-            renderCatalogAdmin(); renderCatalogUser();
-            
-            document.getElementById('prodName').value = '';
-            document.getElementById('prodPrice').value = '';
-            document.getElementById('prodImg').value = '';
-            showToast('Produk disimpan', 'success');
-        }
-
-        function deleteCatalogItem(id) {
-            if(!confirm('Hapus produk?')) return;
-            catalogData = catalogData.filter(i => i.id !== id);
-            saveCollection('app_catalog', { list: catalogData });
-            renderCatalogAdmin(); renderCatalogUser();
-        }
-
-        function renderCatalogUser() {
-            const c = document.getElementById('catalogContainer');
-            c.innerHTML = '';
-            if(catalogData.length === 0) return c.innerHTML = '<div class="text-center text-slate-500 text-xs py-10">Belum ada produk.</div>';
-
-            catalogData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'flex gap-3 bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl items-center';
-                div.innerHTML = `
-                    <div class="w-16 h-16 bg-slate-700 rounded-lg overflow-hidden flex-shrink-0">
-                        <img src="${item.img || 'https://via.placeholder.com/100'}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-sm truncate text-white">${item.name}</h4>
-                        <p class="text-xs text-pink-400 font-bold mt-1">Rp ${item.price}</p>
-                    </div>
-                    <button onclick="orderProduct('${item.name}')" class="bg-green-600/20 text-green-400 p-2 rounded-lg hover:bg-green-600 hover:text-white transition">
-                        <i class="ph-fill ph-whatsapp-logo text-lg"></i>
-                    </button>
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        function renderCatalogAdmin() {
-            const c = document.getElementById('adminCatalogList');
-            c.innerHTML = '';
-            catalogData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-800';
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-slate-800 rounded overflow-hidden"><img src="${item.img}" class="w-full h-full object-cover"></div>
-                        <div>
-                            <div class="text-xs font-bold">${item.name}</div>
-                            <div class="text-[10px] text-slate-500">${item.price}</div>
-                        </div>
-                    </div>
-                    <button onclick="deleteCatalogItem(${item.id})" class="text-red-400 hover:text-red-300"><i class="ph-bold ph-trash"></i></button>
-                `;
-                c.appendChild(div);
-            });
-        }
-
-        function orderProduct(name) {
-            const msg = `Halo, saya ingin pesan produk: ${name}`;
-            const url = `https://wa.me/${appConfig.waNumber}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        // --- CONFIG & CONTACT LOGIC ---
-        function saveConfig() {
-            const wa = document.getElementById('inputWaAdmin').value;
-            const run = document.getElementById('inputRunningText').value;
-            appConfig = { waNumber: wa, runningText: run };
-            saveCollection('app_config', appConfig);
-            updateUIConfig();
-            showToast('Konfigurasi Disimpan', 'success');
-        }
-
-        function openWhatsApp() {
-            window.open(`https://wa.me/${appConfig.waNumber}`, '_blank');
-        }
-        function callPhone() {
-            window.open(`tel:${appConfig.waNumber}`, '_blank'); // Asumsi nomor sama
-        }
-
-        // --- ADMIN TABS & MENU LOGIC (Existing) ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('content-' + tabId).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('btn-' + tabId).classList.add('active');
-        }
-
-        function renderDynamicMenu() {
-            const grid = document.getElementById('dynamicMenuGrid');
-            const emptyMsg = document.getElementById('emptyMenuMsg');
-            grid.innerHTML = '';
-            if (extraMenus.length === 0) { emptyMsg.classList.remove('hidden'); return; }
-            emptyMsg.classList.add('hidden');
-            extraMenus.forEach(menu => {
-                const div = document.createElement('div');
-                div.className = 'flex flex-col items-center gap-2 cursor-pointer group animate-fade-in';
-                div.onclick = () => window.open(menu.url, '_blank');
-                div.innerHTML = `<div class="w-14 h-14 rounded-2xl bg-slate-700/50 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition-colors"><i class="ph ${menu.icon} text-2xl text-pink-400"></i></div><span class="text-[10px] text-slate-400 font-medium text-center truncate w-full">${menu.name}</span>`;
-                grid.appendChild(div);
-            });
-        }
-        
-        function renderAdminMenuList() {
-             const list = document.getElementById('adminMenuList'); list.innerHTML = '';
-             extraMenus.forEach((menu, index) => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-800';
-                item.innerHTML = `<div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center border border-slate-700"><i class="ph ${menu.icon} text-slate-400"></i></div><div class="flex-1 min-w-0"><div class="text-[10px] text-slate-500 mb-1 truncate">${menu.name}</div><input type="text" id="url-input-${index}" value="${menu.url}" class="w-full bg-slate-800 border-none text-xs text-white rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 outline-none"></div><button onclick="deleteMenu(${index})" class="text-red-500 p-2"><i class="ph ph-trash"></i></button>`;
-                list.appendChild(item);
-             });
-        }
-        function addMenu() {
-            const name = document.getElementById('newMenuName').value;
-            const url = document.getElementById('newMenuUrl').value;
-            const icon = document.getElementById('selectedIcon').value;
-            if(!name) return showToast("Nama wajib diisi", "warning");
-            extraMenus.push({ id: Date.now(), name, url: url || '#', icon });
-            saveCollection('app_menus_v4', { list: extraMenus });
-            renderDynamicMenu(); renderAdminMenuList();
-            document.getElementById('newMenuName').value = '';
-            document.getElementById('newMenuUrl').value = '';
-        }
-        function deleteMenu(i) {
-             if(confirm('Hapus?')) { extraMenus.splice(i, 1); saveCollection('app_menus_v4', { list: extraMenus }); renderDynamicMenu(); renderAdminMenuList(); }
-        }
-
-        // --- AUTH ---
+        // --- AUTH & PIN MANAGEMENT ---
         function checkAdminPass() {
             if(document.getElementById('adminPass').value === adminCode) {
                 closeAdminLogin();
@@ -827,38 +668,340 @@
                 switchTab('tab-toko');
             } else showToast("PIN Salah!", "warning");
         }
+
+        function updateAdminPin() {
+            const newPin = document.getElementById('newAdminPin').value;
+            if (!newPin || newPin.length < 4) return showToast('PIN minimal 4 digit', 'warning');
+            
+            appConfig.adminPin = newPin;
+            adminCode = newPin;
+            
+            saveCollection('app_config', appConfig);
+            document.getElementById('newAdminPin').value = '';
+            showToast('PIN Admin Diperbarui!', 'success');
+        }
+
         function openAdminLogin() { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminModal').classList.add('flex'); }
         function closeAdminLogin() { document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('flex'); }
         function logoutDev() { document.getElementById('devDashboard').classList.add('hidden'); document.getElementById('devDashboard').classList.remove('flex'); }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.app-page').forEach(el => el.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        // --- CALENDAR LOGIC ---
+        function renderCalendarUser() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            
+            document.getElementById('currentMonthYear').innerText = `${monthNames[month]} ${year}`;
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${year}-${month + 1}-${day}`;
+                const hasEvent = userReminders[dateKey] ? 'has-event' : '';
+                const isToday = new Date().toDateString() === new Date(year, month, day).toDateString() ? 'today' : '';
+                
+                const dayEl = document.createElement('div');
+                dayEl.className = `calendar-day ${hasEvent} ${isToday}`;
+                dayEl.innerText = day;
+                dayEl.onclick = () => openReminderModal(dateKey);
+                grid.appendChild(dayEl);
+            }
+            renderReminderList();
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendarUser();
+        }
+
+        let selectedDateKey = null;
+        function openReminderModal(dateKey) {
+            selectedDateKey = dateKey;
+            document.getElementById('modalDateTitle').innerText = `Tanggal: ${dateKey}`;
+            document.getElementById('reminderInput').value = userReminders[dateKey] || '';
+            document.getElementById('reminderModal').classList.remove('hidden');
+            document.getElementById('reminderModal').classList.add('flex');
+        }
+
+        function closeReminderModal() {
+            document.getElementById('reminderModal').classList.add('hidden');
+            document.getElementById('reminderModal').classList.remove('flex');
+        }
+
+        function saveReminder() {
+            const val = document.getElementById('reminderInput').value;
+            if(val) userReminders[selectedDateKey] = val;
+            else delete userReminders[selectedDateKey];
+            
+            localStorage.setItem('mf_user_reminders', JSON.stringify(userReminders));
+            renderCalendarUser();
+            closeReminderModal();
+            showToast('Pengingat Disimpan', 'success');
+        }
+
+        function renderReminderList() {
+            const list = document.getElementById('reminderList');
+            list.innerHTML = '';
+            const keys = Object.keys(userReminders).sort();
+            if(keys.length === 0) list.innerHTML = '<div class="text-xs text-slate-500">Belum ada pengingat.</div>';
+            keys.forEach(k => {
+                list.innerHTML += `<div class="bg-slate-800 p-2 rounded flex justify-between items-center"><span class="text-xs text-white"><b>${k}:</b> ${userReminders[k]}</span><button onclick="deleteReminder('${k}')" class="text-red-400"><i class="ph ph-trash"></i></button></div>`;
+            });
+        }
+        
+        function deleteReminder(k) {
+            if(confirm('Hapus pengingat?')) {
+                delete userReminders[k];
+                localStorage.setItem('mf_user_reminders', JSON.stringify(userReminders));
+                renderCalendarUser();
+            }
+        }
+
+        // --- RENDER MAIN GRID ---
+        function renderStaticGrid() {
+            const grid = document.getElementById('staticGrid');
+            grid.innerHTML = '';
+            const colorMap = {
+                'blue': 'text-blue-400 bg-blue-500/10', 'green': 'text-green-400 bg-green-500/10',
+                'pink': 'text-pink-400 bg-pink-500/10', 'purple': 'text-purple-400 bg-purple-500/10',
+                'orange': 'text-orange-400 bg-orange-500/10', 'slate': 'text-slate-500 bg-slate-800/50 border border-slate-700 border-dashed'
+            };
+
+            mainMenuData.forEach(menu => {
+                let style = colorMap[menu.color] || colorMap['slate'];
+                let isEmpty = menu.isEmpty;
+                let clickAction = () => {
+                    if(isEmpty) return showToast('Slot menu ini belum diaktifkan', 'info');
+                    if(menu.action === 'wa') return openWhatsApp();
+                    if(menu.action && menu.action.startsWith('page:')) return navigateTo(menu.action.split(':')[1]);
+                    if(menu.action && menu.action.startsWith('url:')) {
+                        const url = menu.action.split('url:')[1];
+                        if(url && url !== '#') window.open(url, '_blank');
+                        else showToast('Link belum diatur', 'warning');
+                        return;
+                    }
+                };
+                let containerClass = "w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-black/20 group-hover:scale-105 transition-transform duration-300 glass";
+                if(isEmpty) { containerClass = "w-16 h-16 rounded-2xl flex items-center justify-center " + style; style = "text-slate-500"; } 
+                else { containerClass += " " + style.split(' ')[1]; }
+
+                const div = document.createElement('div');
+                div.className = 'flex flex-col items-center gap-2 cursor-pointer group';
+                div.onclick = clickAction;
+                div.innerHTML = `<div class="${containerClass}"><i class="ph ${menu.icon} text-3xl ${style.split(' ')[0]}"></i></div><span class="text-xs text-slate-400 font-medium text-center truncate w-full group-hover:text-white transition-colors">${menu.name}</span>`;
+                grid.appendChild(div);
+            });
+        }
+
+        // --- NEW FEATURES: EVENTS ---
+        function addEventItem() {
+            const name = document.getElementById('eventName').value;
+            const date = document.getElementById('eventDate').value;
+            const desc = document.getElementById('eventDesc').value;
+            if(!name) return showToast('Nama acara wajib', 'warning');
+            eventsData.push({ id: Date.now(), name, date, desc });
+            saveCollection('app_events', { list: eventsData });
+            renderEventsAdmin(); renderEventsUser();
+            document.getElementById('eventName').value = '';
+            document.getElementById('eventDate').value = '';
+            document.getElementById('eventDesc').value = '';
+        }
+        function deleteEventItem(id) {
+            if(confirm('Hapus acara?')) { eventsData = eventsData.filter(i => i.id !== id); saveCollection('app_events', { list: eventsData }); renderEventsAdmin(); renderEventsUser(); }
+        }
+        function renderEventsUser() {
+            const c = document.getElementById('eventsContainer'); c.innerHTML = '';
+            if(eventsData.length === 0) return c.innerHTML = '<div class="text-center text-slate-500 text-xs py-10">Belum ada acara.</div>';
+            eventsData.forEach(item => {
+                c.innerHTML += `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700"><h4 class="font-bold text-orange-400">${item.name}</h4><div class="text-xs text-slate-400 mt-1 mb-2"><i class="ph-fill ph-calendar"></i> ${item.date}</div><p class="text-xs text-slate-300 leading-relaxed">${item.desc}</p></div>`;
+            });
+        }
+        function renderEventsAdmin() {
+            const c = document.getElementById('adminEventsList'); c.innerHTML = '';
+            eventsData.forEach(item => {
+                c.innerHTML += `<div class="bg-slate-900 p-3 rounded flex justify-between items-center"><div><div class="text-xs font-bold text-white">${item.name}</div><div class="text-[10px] text-slate-500">${item.date}</div></div><button onclick="deleteEventItem(${item.id})" class="text-red-400"><i class="ph ph-trash"></i></button></div>`;
+            });
+        }
+
+        // --- ADMIN MAIN MENU ---
+        function renderAdminMainMenuInputs() {
+            const container = document.getElementById('adminMainMenuEditor');
+            if(!container) return;
+            container.innerHTML = '';
+            mainMenuData.forEach((menu, index) => {
+                const colorMap = { 'blue': 'bg-blue-500/20 text-blue-400', 'green': 'bg-green-500/20 text-green-400', 'pink': 'bg-pink-500/20 text-pink-400', 'purple': 'bg-purple-500/20 text-purple-400', 'orange': 'bg-orange-500/20 text-orange-400', 'slate': 'bg-slate-700 text-slate-400' };
+                const badgeStyle = colorMap[menu.color] || colorMap['slate'];
+                container.innerHTML += `<div class="bg-slate-900 border border-slate-800 p-3 rounded-lg flex flex-col gap-2"><div class="flex items-center justify-between mb-1"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded flex items-center justify-center ${badgeStyle}"><i class="ph ${menu.icon}"></i></div><span class="text-xs text-slate-500 font-bold">Slot ${index + 1}</span></div><label class="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer"><input type="checkbox" id="mm-active-${index}" ${!menu.isEmpty ? 'checked' : ''} class="accent-pink-500"> Aktif</label></div><div class="grid grid-cols-2 gap-2"><input type="text" id="mm-name-${index}" value="${menu.name}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-600" placeholder="Nama Menu"><input type="text" id="mm-link-${index}" value="${menu.action || ''}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-600" placeholder="Link/Action"></div></div>`;
+            });
+        }
+        function saveMainMenuConfig() {
+            mainMenuData.forEach((menu, index) => {
+                const nameInput = document.getElementById(`mm-name-${index}`);
+                const linkInput = document.getElementById(`mm-link-${index}`);
+                const activeInput = document.getElementById(`mm-active-${index}`);
+                if (nameInput && linkInput && activeInput) {
+                    mainMenuData[index].name = nameInput.value;
+                    mainMenuData[index].action = linkInput.value;
+                    mainMenuData[index].isEmpty = !activeInput.checked;
+                    if(!mainMenuData[index].isEmpty && mainMenuData[index].color === 'slate') {
+                        mainMenuData[index].color = 'blue'; mainMenuData[index].icon = 'ph-star';
+                    }
+                }
+            });
+            saveCollection('app_main_menus', { list: mainMenuData });
+            renderStaticGrid(); showToast('Menu Utama Diperbarui', 'success');
+        }
+
+        // --- SHARED IMAGE COMPRESSION ---
+        function compressImage(file, maxWidth, quality, callback) {
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = event => { const img = new Image(); img.src = event.target.result; img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; if (width > maxWidth) { height = Math.round(height * (maxWidth / width)); width = maxWidth; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height); callback(canvas.toDataURL('image/jpeg', quality)); } }
+        }
+
+        // --- GALERY LOGIC ---
+        function processAndUploadGallery() {
+            const fileInput = document.getElementById('imgGalleryInput'); const caption = document.getElementById('imgGalleryCaption').value;
+            if (fileInput.files.length === 0) return showToast('Pilih foto dulu!', 'warning');
+            document.getElementById('uploadStatus').classList.remove('hidden');
+            compressImage(fileInput.files[0], 600, 0.6, (base64String) => {
+                galleryData.push({ id: Date.now(), url: base64String, caption }); saveCollection('app_gallery', { list: galleryData }); renderGalleryAdmin(); renderGalleryUser();
+                fileInput.value = ''; document.getElementById('imgGalleryCaption').value = ''; document.getElementById('galleryPreviewName').classList.add('hidden'); document.getElementById('uploadStatus').classList.add('hidden'); showToast('Foto berhasil diupload!', 'success');
+            });
+        }
+        function deleteGalleryItem(id) { if(confirm('Hapus?')) { galleryData = galleryData.filter(i => i.id !== id); saveCollection('app_gallery', { list: galleryData }); renderGalleryAdmin(); renderGalleryUser(); } }
+        function renderGalleryUser() {
+            const c = document.getElementById('galleryContainer'); c.innerHTML = '';
+            if(galleryData.length === 0) return c.innerHTML = '<div class="col-span-2 text-center text-slate-500 text-xs py-10">Belum ada foto.</div>';
+            galleryData.forEach(item => { c.innerHTML += `<div class="gallery-item aspect-square group"><div class="w-full h-full bg-white p-1.5 rounded-xl shadow-lg relative cursor-pointer transform transition-transform duration-300 hover:scale-[1.02]" onclick="openImagePopup('${item.url}', '${item.caption || ''}')"><div class="w-full h-full overflow-hidden rounded-lg bg-slate-200 relative"><img src="${item.url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.src='https://via.placeholder.com/150?text=Error'"></div></div></div>`; });
+        }
+        function renderGalleryAdmin() {
+            const c = document.getElementById('adminGalleryList'); c.innerHTML = '';
+            galleryData.forEach(item => { c.innerHTML += `<div class="relative aspect-square rounded-lg overflow-hidden border border-slate-700 group"><img src="${item.url}" class="w-full h-full object-cover"><button onclick="deleteGalleryItem(${item.id})" class="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-md opacity-80 hover:opacity-100"><i class="ph-bold ph-trash"></i></button></div>`; });
+        }
+
+        // --- CATALOG LOGIC ---
+        function processAndAddCatalogItem() {
+            const name = document.getElementById('prodName').value; const price = document.getElementById('prodPrice').value; const fileInput = document.getElementById('prodImgInput');
+            if(!name) return showToast('Nama wajib', 'warning');
+            if(fileInput.files.length === 0) return showToast('Pilih foto', 'warning');
+            
+            document.getElementById('prodUploadStatus').classList.remove('hidden');
+            compressImage(fileInput.files[0], 600, 0.6, (base64String) => {
+                catalogData.push({ id: Date.now(), name, price, img: base64String });
+                saveCollection('app_catalog', { list: catalogData });
+                renderCatalogAdmin(); renderCatalogUser();
+                document.getElementById('prodName').value = ''; document.getElementById('prodPrice').value = ''; fileInput.value = '';
+                document.getElementById('prodPreviewName').classList.add('hidden'); document.getElementById('prodUploadStatus').classList.add('hidden');
+                showToast('Produk disimpan', 'success');
+            });
+        }
+        function deleteCatalogItem(id) { if(confirm('Hapus?')) { catalogData = catalogData.filter(i => i.id !== id); saveCollection('app_catalog', { list: catalogData }); renderCatalogAdmin(); renderCatalogUser(); } }
+        function renderCatalogUser() {
+            const c = document.getElementById('catalogContainer'); c.innerHTML = '';
+            if(catalogData.length === 0) return c.innerHTML = '<div class="col-span-2 text-center text-slate-500 text-xs py-10">Belum ada produk.</div>';
+            catalogData.forEach(item => {
+                c.innerHTML += `<div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 group"><div class="relative w-full aspect-square overflow-hidden cursor-pointer" onclick="openImagePopup('${item.img}', '${item.name} - ${item.price}')"><img src="${item.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"></div><div class="p-3"><h4 class="text-xs font-bold text-white truncate">${item.name}</h4><div class="flex justify-between items-center mt-2"><p class="text-xs text-pink-400 font-bold">${item.price}</p><button onclick="orderProduct('${item.name}')" class="bg-green-600/20 text-green-400 p-1.5 rounded-lg hover:bg-green-600 hover:text-white transition"><i class="ph-fill ph-whatsapp-logo text-lg"></i></button></div></div></div>`;
+            });
+        }
+        function renderCatalogAdmin() {
+            const c = document.getElementById('adminCatalogList'); c.innerHTML = '';
+            catalogData.forEach(item => { c.innerHTML += `<div class="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-800"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-slate-800 rounded overflow-hidden"><img src="${item.img}" class="w-full h-full object-cover"></div><div><div class="text-xs font-bold">${item.name}</div><div class="text-[10px] text-slate-500">${item.price}</div></div></div><button onclick="deleteCatalogItem(${item.id})" class="text-red-400 hover:text-red-300"><i class="ph-bold ph-trash"></i></button></div>`; });
+        }
+
+        // --- OTHER PRODUCTS LOGIC ---
+        function processAndAddOtherProductItem() {
+            const name = document.getElementById('otherProdName').value; const price = document.getElementById('otherProdPrice').value; const fileInput = document.getElementById('otherProdImgInput');
+            if(!name) return showToast('Nama wajib', 'warning');
+            if(fileInput.files.length === 0) return showToast('Pilih foto', 'warning');
+            
+            document.getElementById('otherProdUploadStatus').classList.remove('hidden');
+            compressImage(fileInput.files[0], 600, 0.6, (base64String) => {
+                otherProductsData.push({ id: Date.now(), name, price, img: base64String });
+                saveCollection('app_other_products', { list: otherProductsData });
+                renderOtherProductsAdmin(); renderOtherProductsUser();
+                document.getElementById('otherProdName').value = ''; document.getElementById('otherProdPrice').value = ''; fileInput.value = '';
+                document.getElementById('otherProdPreviewName').classList.add('hidden'); document.getElementById('otherProdUploadStatus').classList.add('hidden');
+                showToast('Produk lain disimpan', 'success');
+            });
+        }
+        function deleteOtherProductItem(id) { if(confirm('Hapus?')) { otherProductsData = otherProductsData.filter(i => i.id !== id); saveCollection('app_other_products', { list: otherProductsData }); renderOtherProductsAdmin(); renderOtherProductsUser(); } }
+        function renderOtherProductsUser() {
+            const c = document.getElementById('otherProductsContainer'); c.innerHTML = '';
+            if(otherProductsData.length === 0) return c.innerHTML = '<div class="col-span-2 text-center text-slate-500 text-xs py-10">Belum ada produk.</div>';
+            otherProductsData.forEach(item => {
+                c.innerHTML += `<div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 group"><div class="relative w-full aspect-square overflow-hidden cursor-pointer" onclick="openImagePopup('${item.img}', '${item.name} - ${item.price}')"><img src="${item.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"></div><div class="p-3"><h4 class="text-xs font-bold text-white truncate">${item.name}</h4><div class="flex justify-between items-center mt-2"><p class="text-xs text-indigo-400 font-bold">${item.price}</p><button onclick="orderProduct('${item.name}')" class="bg-indigo-600/20 text-indigo-400 p-1.5 rounded-lg hover:bg-indigo-600 hover:text-white transition"><i class="ph-fill ph-whatsapp-logo text-lg"></i></button></div></div></div>`;
+            });
+        }
+        function renderOtherProductsAdmin() {
+            const c = document.getElementById('adminOtherProductsList'); c.innerHTML = '';
+            otherProductsData.forEach(item => { c.innerHTML += `<div class="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-800"><div class="flex items-center gap-3"><div class="w-8 h-8 bg-slate-800 rounded overflow-hidden"><img src="${item.img}" class="w-full h-full object-cover"></div><div><div class="text-xs font-bold">${item.name}</div><div class="text-[10px] text-slate-500">${item.price}</div></div></div><button onclick="deleteOtherProductItem(${item.id})" class="text-red-400 hover:text-red-300"><i class="ph-bold ph-trash"></i></button></div>`; });
+        }
+
+        // --- SHARED UTILS ---
+        function orderProduct(name) { window.open(`https://wa.me/${appConfig.waNumber}?text=${encodeURIComponent('Halo, pesan: ' + name)}`, '_blank'); }
+        function saveConfig() {
+            appConfig.waNumber = document.getElementById('inputWaAdmin').value;
+            appConfig.runningText = document.getElementById('inputRunningText').value;
+            saveCollection('app_config', appConfig); updateUIConfig(); showToast('Tersimpan', 'success');
+        }
+        function openWhatsApp() { window.open(`https://wa.me/${appConfig.waNumber}`, '_blank'); }
+        function callPhone() { window.open(`tel:${appConfig.waNumber}`, '_blank'); }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.getElementById('content-' + tabId).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById('btn-' + tabId).classList.add('active');
+        }
+        function renderDynamicMenu() {
+            const grid = document.getElementById('dynamicMenuGrid'), msg = document.getElementById('emptyMenuMsg'); grid.innerHTML = '';
+            if (extraMenus.length === 0) { msg.classList.remove('hidden'); return; } msg.classList.add('hidden');
+            extraMenus.forEach(menu => { grid.innerHTML += `<div class="flex flex-col items-center gap-2 cursor-pointer group animate-fade-in" onclick="window.open('${menu.url}', '_blank')"><div class="w-14 h-14 rounded-2xl bg-slate-700/50 border border-slate-600 flex items-center justify-center hover:bg-slate-700 transition-colors"><i class="ph ${menu.icon} text-2xl text-pink-400"></i></div><span class="text-[10px] text-slate-400 font-medium text-center truncate w-full">${menu.name}</span></div>`; });
+        }
+        function renderAdminMenuList() {
+             const list = document.getElementById('adminMenuList'); list.innerHTML = '';
+             extraMenus.forEach((menu, index) => { list.innerHTML += `<div class="flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-800"><div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center border border-slate-700"><i class="ph ${menu.icon} text-slate-400"></i></div><div class="flex-1 min-w-0"><div class="text-[10px] text-slate-500 mb-1 truncate">${menu.name}</div><input type="text" id="url-input-${index}" value="${menu.url}" class="w-full bg-slate-800 border-none text-xs text-white rounded px-2 py-1 focus:ring-1 focus:ring-blue-500 outline-none"></div><button onclick="deleteMenu(${index})" class="text-red-500 p-2"><i class="ph ph-trash"></i></button></div>`; });
+        }
+        function addMenu() {
+            const name = document.getElementById('newMenuName').value, url = document.getElementById('newMenuUrl').value, icon = document.getElementById('selectedIcon').value;
+            if(!name) return showToast("Nama wajib", "warning");
+            extraMenus.push({ id: Date.now(), name, url: url || '#', icon }); saveCollection('app_menus_v4', { list: extraMenus }); renderDynamicMenu(); renderAdminMenuList();
+            document.getElementById('newMenuName').value = ''; document.getElementById('newMenuUrl').value = '';
+        }
+        function deleteMenu(i) { if(confirm('Hapus?')) { extraMenus.splice(i, 1); saveCollection('app_menus_v4', { list: extraMenus }); renderDynamicMenu(); renderAdminMenuList(); } }
+        
         function toggleQuickMenu() {
             const m = document.getElementById('quickMenu'), c = document.getElementById('quickMenuContent');
             if(m.classList.contains('hidden')){ m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(() => c.classList.remove('translate-y-full'), 10); } 
             else { c.classList.add('translate-y-full'); setTimeout(() => { m.classList.add('hidden'); m.classList.remove('flex'); }, 300); }
         }
-        
-        // --- UTILS ---
-        function showToast(msg, type) {
-            const d = document.createElement('div');
-            const icon = type === 'warning' ? 'ph-warning-circle text-yellow-400' : type === 'success' ? 'ph-check-circle text-green-400' : 'ph-info text-blue-400';
-            d.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800/95 backdrop-blur border border-slate-600 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 z-[100] min-w-[200px] justify-center scale-0 transition-transform duration-200';
-            d.innerHTML = `<i class="ph-fill ${icon} text-xl"></i><span class="font-medium text-sm text-white">${msg}</span>`;
-            document.body.appendChild(d);
-            setTimeout(() => d.classList.remove('scale-0'), 10);
-            setTimeout(() => { d.classList.add('scale-0'); setTimeout(() => d.remove(), 200); }, 1500);
+        function openImagePopup(url, caption) {
+            const p = document.getElementById('imagePopup'), i = document.getElementById('popupImg'), c = document.getElementById('popupCaption');
+            i.src = url; c.innerText = caption || ''; if(!caption) c.classList.add('hidden'); else c.classList.remove('hidden'); p.classList.remove('hidden');
         }
-
-        const availableIcons = ['ph-star', 'ph-tag', 'ph-image', 'ph-user', 'ph-globe', 'ph-storefront', 'ph-shopping-cart', 'ph-credit-card', 'ph-calendar', 'ph-gift'];
+        function closeImagePopup() { document.getElementById('imagePopup').classList.add('hidden'); }
+        function showToast(msg, type) {
+            const d = document.createElement('div'), i = type === 'warning' ? 'ph-warning-circle text-yellow-400' : type === 'success' ? 'ph-check-circle text-green-400' : 'ph-info text-blue-400';
+            d.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800/95 backdrop-blur border border-slate-600 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 z-[100] min-w-[200px] justify-center scale-0 transition-transform duration-200';
+            d.innerHTML = `<i class="ph-fill ${i} text-xl"></i><span class="font-medium text-sm text-white">${msg}</span>`;
+            document.body.appendChild(d); setTimeout(() => d.classList.remove('scale-0'), 10); setTimeout(() => { d.classList.add('scale-0'); setTimeout(() => d.remove(), 200); }, 1500);
+        }
         function renderIconSelector() {
             const c = document.getElementById('iconSelector'); c.innerHTML = '';
-            availableIcons.forEach(icon => {
-                const d = document.createElement('div');
-                d.className = 'icon-option h-10 w-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center cursor-pointer hover:border-slate-500 transition';
-                d.innerHTML = `<i class="ph ${icon} text-lg text-slate-300"></i>`;
-                d.onclick = () => { document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected')); d.classList.add('selected'); document.getElementById('selectedIcon').value = icon; };
-                c.appendChild(d);
+            ['ph-star', 'ph-tag', 'ph-image', 'ph-user', 'ph-globe', 'ph-storefront', 'ph-shopping-cart', 'ph-credit-card', 'ph-calendar', 'ph-gift'].forEach(icon => {
+                const d = document.createElement('div'); d.className = 'icon-option h-10 w-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center cursor-pointer hover:border-slate-500 transition'; d.innerHTML = `<i class="ph ${icon} text-lg text-slate-300"></i>`;
+                d.onclick = () => { document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected')); d.classList.add('selected'); document.getElementById('selectedIcon').value = icon; }; c.appendChild(d);
             });
         }
-
         window.onload = () => { initApp(); renderIconSelector(); };
     </script>
 </body>
