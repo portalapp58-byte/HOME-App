@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MalangFlorist Group</title>
+    
+    <!-- Tailwind CSS (Desain) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ikon -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Font Modern -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FIREBASE SDK (Mesin Online) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: white; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .icon-option.selected { background-color: rgba(236, 72, 153, 0.2); border-color: #ec4899; color: #ec4899; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #ec4899; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Status Badge */
+        .status-badge {
+            position: fixed; bottom: 80px; right: 20px; padding: 4px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: bold; z-index: 50; backdrop-filter: blur(4px); opacity: 0.7; pointer-events: none;
+        }
+        .status-offline { background: rgba(255, 165, 0, 0.2); color: orange; border: 1px solid orange; }
+        .status-online { background: rgba(0, 255, 0, 0.2); color: #4ade80; border: 1px solid #4ade80; }
+    </style>
+</head>
+<body class="bg-slate-900 h-screen w-full flex justify-center overflow-hidden">
+
+    <div class="w-full max-w-md h-full bg-slate-900 relative shadow-2xl overflow-hidden flex flex-col">
+        
+        <!-- HEADER -->
+        <header class="px-6 pt-6 pb-2 flex justify-between items-center z-20">
+            <div class="flex flex-col">
+                <span class="text-xs text-slate-400">Selamat Datang di</span>
+                <span class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+                    MalangFlorist Group
+                </span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-purple-600 p-0.5 shadow-lg shadow-pink-500/20">
+                <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
+                    <i class="ph-fill ph-flower-lotus text-pink-500 text-xl"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+            
+            <!-- HERO BANNER -->
+            <div class="px-6 mt-4">
+                <div class="w-full h-40 rounded-3xl bg-gradient-to-r from-pink-600 to-purple-600 p-6 shadow-lg shadow-pink-500/20 relative overflow-hidden flex items-center">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/20 rounded-full blur-xl"></div>
+                    <div class="absolute left-10 top-0 w-20 h-20 bg-purple-400/20 rounded-full blur-xl"></div>
+                    <div class="relative z-10 w-2/3">
+                        <h2 class="text-xl font-bold mb-1">Kirim Ucapan Terbaik</h2>
+                        <p class="text-pink-100 text-xs leading-relaxed">Papan Bunga, Standing Flower & Hand Bouquet Terpercaya.</p>
+                        <button class="mt-3 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-semibold transition backdrop-blur-sm border border-white/10" onclick="showToast('Katalog Segera Hadir', 'info')">Lihat Katalog</button>
+                    </div>
+                    <div class="absolute right-2 top-1/2 transform -translate-y-1/2"><i class="ph-fill ph-flower-lotus text-7xl text-white/20 rotate-12"></i></div>
+                </div>
+            </div>
+
+            <!-- MAIN MENU GRID -->
+            <div class="px-6 mt-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-slate-300 text-sm font-semibold">Daftar Menu</h3>
+                    <div id="loadingIndicator" class="hidden"><div class="loader"></div></div>
+                </div>
+                <div id="menuGrid" class="grid grid-cols-4 gap-y-8 gap-x-2"></div>
+            </div>
+
+             <!-- Info Section -->
+             <div class="px-6 mt-8 mb-8">
+                <div class="p-4 rounded-xl border border-slate-700 bg-slate-800/50 flex items-start gap-3">
+                    <i class="ph-fill ph-info text-blue-400 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-200">Info Layanan</h4>
+                        <p class="text-xs text-slate-400 mt-1">Kami melayani pengiriman ke seluruh area Malang Raya dan sekitarnya 24 Jam.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- STATUS INDICATOR -->
+        <div id="statusIndicator" class="status-badge status-offline">Offline Mode</div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="absolute bottom-0 w-full glass z-30 px-6 py-4 flex justify-between items-center rounded-t-3xl">
+            <button class="nav-btn flex flex-col items-center gap-1 text-pink-400" onclick="location.reload()">
+                <i class="ph-fill ph-house text-2xl"></i> <span class="text-[10px] font-medium">Home</span>
+            </button>
+            <button onclick="toggleQuickMenu()" class="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 shadow-lg shadow-pink-500/40 flex items-center justify-center transform -translate-y-6 hover:scale-105 transition-transform ripple">
+                <i class="ph ph-squares-four text-white text-2xl"></i>
+            </button>
+            <button class="nav-btn flex flex-col items-center gap-1 text-slate-500 hover:text-pink-300 transition-colors" onclick="openAdminLogin()">
+                <i class="ph ph-shield-check text-2xl"></i> <span class="text-[10px] font-medium">Admin</span>
+            </button>
+        </nav>
+
+        <!-- QUICK MENU -->
+        <div id="quickMenu" class="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm hidden flex-col justify-end" onclick="toggleQuickMenu()">
+             <div class="bg-slate-800 rounded-t-3xl p-6 transform transition-transform duration-300 translate-y-full" id="quickMenuContent" onclick="event.stopPropagation()">
+                <div class="w-12 h-1 bg-slate-600 rounded-full mx-auto mb-6"></div>
+                <h3 class="text-lg font-bold mb-4 text-center">Hubungi Kami</h3>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 cursor-pointer" onclick="showToast('Membuka WhatsApp...', 'success')"> <i class="ph ph-whatsapp-logo text-green-400 text-2xl"></i> <span class="text-xs">Chat WA</span> </div>
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 cursor-pointer" onclick="showToast('Menghubungi...', 'success')"> <i class="ph ph-phone-call text-blue-400 text-2xl"></i> <span class="text-xs">Telepon</span> </div>
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-700/50 hover:bg-slate-700 cursor-pointer" onclick="showToast('Membuka Maps...', 'success')"> <i class="ph ph-map-pin text-red-400 text-2xl"></i> <span class="text-xs">Lokasi</span> </div>
+                </div>
+                <button onclick="toggleQuickMenu()" class="w-full py-3 rounded-xl bg-slate-700 text-sm font-medium">Tutup</button>
+            </div>
+        </div>
+
+        <!-- ADMIN LOGIN -->
+        <div id="adminModal" class="absolute inset-0 z-50 bg-slate-900 hidden flex-col items-center justify-center p-6">
+            <button onclick="closeAdminLogin()" class="absolute top-6 left-6 p-2 rounded-full bg-slate-800 text-slate-400"><i class="ph ph-x text-xl"></i></button>
+            <div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-6"><i class="ph-fill ph-lock-key text-4xl text-pink-500"></i></div>
+            <h2 class="text-2xl font-bold mb-2">Login Admin</h2>
+            <p class="text-slate-400 text-sm text-center mb-8">Masukkan kode akses untuk kelola Aplikasi.</p>
+            <input type="password" id="adminPass" placeholder="Kode Akses (Default: 1234)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white mb-4 text-center text-lg">
+            <button onclick="checkAdminPass()" class="w-full bg-pink-600 py-3 rounded-xl font-bold">Masuk Dashboard</button>
+        </div>
+
+        <!-- DASHBOARD ADMIN -->
+        <div id="devDashboard" class="absolute inset-0 z-50 bg-slate-900 hidden flex-col">
+            <header class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900 shadow-md z-10">
+                <div>
+                    <h2 class="font-bold text-lg text-white">Dashboard Admin</h2>
+                    <p class="text-[10px] text-slate-400" id="devStatusText">Mode: Offline</p>
+                </div>
+                <button onclick="logoutDev()" class="text-red-400 bg-red-400/10 px-3 py-1.5 rounded-lg text-xs font-bold">Keluar</button>
+            </header>
+            
+            <div class="flex-1 overflow-y-auto p-6 pb-20">
+                <!-- Alert Offline -->
+                <div id="offlineAlert" class="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg hidden">
+                    <p class="text-xs text-yellow-200">⚠️ <b>Mode Offline:</b> Config Firebase belum diatur. Data tersimpan di HP ini saja.</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
+                    <h3 class="text-sm font-bold text-pink-400 mb-4">+ Tambah Menu</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="newMenuName" placeholder="Nama Menu (misal: Absensi)" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                        <input type="text" id="newMenuUrl" placeholder="URL (https://...)" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                        <div class="grid grid-cols-5 gap-2" id="iconSelector"></div>
+                        <input type="hidden" id="selectedIcon" value="ph-star">
+                        <button onclick="addMenu()" class="w-full bg-pink-600 py-2.5 rounded-lg text-sm font-bold">Simpan Menu</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-xl p-5 border border-slate-700 mb-6">
+                    <h3 class="text-sm font-bold text-blue-400 mb-4">Edit Link Aktif</h3>
+                    <div id="adminMenuList" class="space-y-3"></div>
+                    <button onclick="saveAllChanges()" class="w-full mt-4 bg-blue-600 py-2.5 rounded-lg text-sm font-bold">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC SYSTEM -->
+    <script>
+        // --- TEMPAT MENEMPEL KODE FIREBASE (NANTI) ---
+        const firebaseConfig = {
+			apiKey: "AIzaSyA2WyjqAY-2EpygqC0izptGwaVwskkKGEA",
+			authDomain: "home-app-dae08.firebaseapp.com",
+			projectId: "home-app-dae08",
+			storageBucket: "home-app-dae08.firebasestorage.app",
+			messagingSenderId: "246725669326",
+			appId: "1:246725669326:web:30f2c24ea72f14d9cc3b9f"
+		};
+
+        // --- SISTEM ---
+        let db;
+        let useLocalStorage = false;
+        const isConfigured = firebaseConfig.projectId !== "ISI_PROJECT_ID_DISINI";
+        let menuData = [];
+        const adminCode = "1234";
+
+        function initApp() {
+            const statusEl = document.getElementById('statusIndicator');
+            const devStatus = document.getElementById('devStatusText');
+            const offlineAlert = document.getElementById('offlineAlert');
+
+            if (isConfigured) {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.firestore();
+                    db.enableNetwork().then(() => {
+                        console.log("Online");
+                        statusEl.className = "status-badge status-online";
+                        statusEl.innerText = "Online DB";
+                        devStatus.innerText = "Mode: Online (Database)";
+                    }).catch(() => activateOfflineMode());
+                } catch (e) { activateOfflineMode(); }
+            } else { activateOfflineMode(); }
+
+            function activateOfflineMode() {
+                useLocalStorage = true;
+                statusEl.className = "status-badge status-offline";
+                statusEl.innerText = "Demo / Offline";
+                devStatus.innerText = "Mode: Offline (LocalStorage)";
+                if(offlineAlert) offlineAlert.classList.remove('hidden');
+                loadData();
+            }
+            loadData();
+        }
+
+        async function loadData() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            if (useLocalStorage) {
+                const localData = localStorage.getItem('mf_menus_v3');
+                menuData = localData ? JSON.parse(localData) : getDefaultMenus();
+                finishLoad();
+                return;
+            }
+            try {
+                const doc = await db.collection("settings").doc("app_menus").get();
+                if (doc.exists) menuData = doc.data().list || [];
+                else { menuData = getDefaultMenus(); await db.collection("settings").doc("app_menus").set({ list: menuData }); }
+                finishLoad();
+            } catch (e) { 
+                console.error(e);
+                if(menuData.length === 0) menuData = getDefaultMenus(); 
+                finishLoad(); 
+            }
+        }
+
+        function finishLoad() { renderGrid(); renderAdminList(); document.getElementById('loadingIndicator').classList.add('hidden'); }
+        function getDefaultMenus() {
+            return [
+                { id: 1, name: 'Cek Ongkir', icon: 'ph-truck', color: 'blue', url: '#', isDev: false },
+                { id: 2, name: 'Portal Mitra', icon: 'ph-handshake', color: 'green', url: '#', isDev: false },
+                { id: 3, name: 'Admin Web', icon: 'ph-user-gear', color: 'purple', url: '#', isDev: false },
+            ];
+        }
+
+        async function saveData() {
+            if (useLocalStorage) {
+                localStorage.setItem('mf_menus_v3', JSON.stringify(menuData));
+                showToast("Tersimpan di HP (Demo)", "success");
+                return;
+            }
+            showToast("Menyimpan ke Cloud...", "info");
+            try { await db.collection("settings").doc("app_menus").set({ list: menuData }); showToast("Data Tersimpan Online!", "success"); }
+            catch (e) { showToast("Gagal simpan online", "warning"); }
+        }
+
+        // --- RENDER & ACTION ---
+        function renderGrid() {
+            const grid = document.getElementById('menuGrid'); grid.innerHTML = '';
+            const colorMap = { 'blue': 'text-blue-400 group-hover:bg-blue-500/20', 'green': 'text-green-400 group-hover:bg-green-500/20', 'yellow': 'text-yellow-400 group-hover:bg-yellow-500/20', 'pink': 'text-pink-400 group-hover:bg-pink-500/20', 'purple': 'text-purple-400 group-hover:bg-purple-500/20', 'slate': 'text-slate-500' };
+            menuData.forEach(menu => {
+                let styles = colorMap[menu.color] || colorMap['blue']; if(menu.isDev) styles = 'text-slate-500';
+                const div = document.createElement('div'); div.className = 'flex flex-col items-center gap-2 cursor-pointer group'; div.onclick = () => handleMenuClick(menu);
+                const iconBox = menu.isDev ? `w-16 h-16 rounded-2xl glass border-dashed border-slate-600 flex items-center justify-center` : `w-16 h-16 rounded-2xl glass flex items-center justify-center transition-colors duration-300 shadow-lg shadow-black/20 ${styles.split(' ')[1] || ''}`;
+                div.innerHTML = `<div class="${iconBox}"> <i class="ph ${menu.icon} text-3xl ${styles.split(' ')[0]}"></i> </div><span class="text-xs text-slate-400 font-medium text-center truncate w-full">${menu.name}</span>`;
+                grid.appendChild(div);
+            });
+        }
+        function renderAdminList() {
+            const list = document.getElementById('adminMenuList'); list.innerHTML = '';
+            menuData.forEach((menu, index) => {
+                const item = document.createElement('div'); item.className = 'flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-800';
+                item.innerHTML = `<div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center border border-slate-700"><i class="ph ${menu.icon} text-slate-400"></i></div><div class="flex-1 min-w-0"><div class="text-[10px] text-slate-500 mb-1 truncate">${menu.name}</div><input type="text" id="url-input-${index}" value="${menu.url}" class="w-full bg-slate-800 border-none text-xs text-white rounded px-2 py-1 focus:ring-1 focus:ring-blue-500" placeholder="URL"></div><button onclick="deleteMenu(${index})" class="text-red-500 p-2 hover:bg-red-500/10 rounded"><i class="ph ph-trash"></i></button>`;
+                list.appendChild(item);
+            });
+        }
+        function addMenu() {
+            const name = document.getElementById('newMenuName').value; const url = document.getElementById('newMenuUrl').value; const icon = document.getElementById('selectedIcon').value;
+            if(!name) return showToast("Nama wajib diisi", "warning");
+            menuData.push({ id: Date.now(), name, url, icon, color: 'pink', isDev: false });
+            saveData(); document.getElementById('newMenuName').value = ''; renderGrid(); renderAdminList();
+        }
+        function saveAllChanges() { menuData.forEach((menu, index) => { const input = document.getElementById(`url-input-${index}`); if(input) menu.url = input.value; }); saveData(); }
+        function deleteMenu(index) { if(confirm("Hapus menu ini?")) { menuData.splice(index, 1); saveData(); renderGrid(); renderAdminList(); } }
+        function handleMenuClick(menu) { if (!menu.url || menu.url === '#') showToast(`Fitur ${menu.name} segera hadir`, 'warning'); else window.location.href = menu.url; }
+        
+        // --- UTILS ---
+        const availableIcons = ['ph-flower-lotus', 'ph-truck', 'ph-handshake', 'ph-tag', 'ph-image', 'ph-user-gear', 'ph-whatsapp-logo', 'ph-instagram-logo', 'ph-globe', 'ph-envelope', 'ph-storefront', 'ph-star', 'ph-shopping-cart', 'ph-credit-card', 'ph-calendar'];
+        function renderIconSelector() {
+            const c = document.getElementById('iconSelector'); c.innerHTML = '';
+            availableIcons.forEach(icon => {
+                const d = document.createElement('div'); d.className = 'icon-option h-10 w-10 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center cursor-pointer hover:border-slate-500';
+                d.innerHTML = `<i class="ph ${icon} text-lg text-slate-300"></i>`;
+                d.onclick = () => { document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected')); d.classList.add('selected'); document.getElementById('selectedIcon').value = icon; };
+                c.appendChild(d);
+            });
+        }
+        function checkAdminPass() { if(document.getElementById('adminPass').value === adminCode) { closeAdminLogin(); document.getElementById('devDashboard').classList.remove('hidden'); document.getElementById('devDashboard').classList.add('flex'); document.getElementById('adminPass').value = ''; renderAdminList(); } else showToast("Kode salah!", "warning"); }
+        function toggleQuickMenu() { const m=document.getElementById('quickMenu'), c=document.getElementById('quickMenuContent'); if(m.classList.contains('hidden')){m.classList.remove('hidden');m.classList.add('flex');setTimeout(()=>c.classList.remove('translate-y-full'),10);}else{c.classList.add('translate-y-full');setTimeout(()=>{m.classList.add('hidden');m.classList.remove('flex')},300);} }
+        function openAdminLogin() { document.getElementById('adminModal').classList.remove('hidden'); document.getElementById('adminModal').classList.add('flex'); }
+        function closeAdminLogin() { document.getElementById('adminModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('flex'); }
+        function logoutDev() { document.getElementById('devDashboard').classList.add('hidden'); document.getElementById('devDashboard').classList.remove('flex'); }
+        function showToast(m,t){const d=document.createElement('div');const i=t==='warning'?'ph-warning-circle text-yellow-400':t==='success'?'ph-check-circle text-green-400':'ph-info text-blue-400';d.className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800/95 backdrop-blur border border-slate-600 px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 z-[100] min-w-[200px] justify-center scale-0 transition-transform duration-200';d.innerHTML=`<i class="ph-fill ${i} text-xl"></i><span class="font-medium text-sm text-white">${m}</span>`;document.body.appendChild(d);setTimeout(()=>d.classList.remove('scale-0'),10);setTimeout(()=>{d.classList.add('scale-0');setTimeout(()=>d.remove(),200)},1500);}
+
+        window.onload = () => { initApp(); renderIconSelector(); };
+    </script>
+</body>
+</html>
