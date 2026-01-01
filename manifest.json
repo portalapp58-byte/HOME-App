@@ -1,0 +1,20 @@
+{
+  "name": "Malang Florist Group",
+  "short_name": "MFG",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e60023",
+  "icons": [
+    {
+      "src": "/icons/Home.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/Home.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
